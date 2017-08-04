@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE configuration
+ 		 PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+ 		"http://mybatis.org/dtd/mybatis-3-config.dtd">
+  						
+<!--	mybatis-config.xml :: MyBatis Framework  MetaData -->
+<configuration>
+
+	<!-- 기타 설정정보 :: [MyBatis_Home]/mybatis-3.2.1.pdf 참조 -->
+	<settings>
+		<setting name="callSettersOnNulls" value="false"/>
+	</settings>	
+	
+	<!-- FQCN(Full Qualified Class Name) Alias(별칭관리) -->
+	<typeAliases>
+		<typeAlias alias="user" type="com.ustrip.service.domain.User" />
+		<typeAlias alias="blog" type="com.ustrip.service.domain.Blog" />
+		 <typeAlias alias="travel" type="com.ustrip.service.domain.Travel" />
+		<typeAlias alias="city" type="com.ustrip.service.domain.City" />
+		<typeAlias alias="place" type="com.ustrip.service.domain.Place" />
+		<typeAlias alias="hashTag" type="com.ustrip.service.domain.HashTag" />
+		<typeAlias alias="likeTravel" type="com.ustrip.service.domain.LikeTravel" />
+		<typeAlias alias="image" type="com.ustrip.service.domain.Image" />
+		<typeAlias alias="asset" type="com.ustrip.service.domain.Asset" />
+		<typeAlias alias="comment" type="com.ustrip.service.domain.Comment" />
+		<typeAlias alias="board" type="com.ustrip.service.domain.Board" />
+		<typeAlias alias="follow" type="com.ustrip.service.domain.Follow" />
+		<typeAlias alias="message" type="com.ustrip.service.domain.Message" />		
+		<typeAlias alias="search" type="com.ustrip.common.Search" /> 
+	</typeAliases>
+	
+	 <!-- SQL Definition :: file include -->
+	<mappers>
+		<mapper resource="sql/UserMapper.xml"/>
+		<mapper resource="sql/BlogMapper.xml"/>
+		<mapper resource="sql/TravelMapper.xml"/>
+		<mapper resource="sql/FollowMapper.xml"/>		
+		<mapper resource="sql/AssetMapper.xml"/>
+		<mapper resource="sql/BoardMapper.xml"/>
+		<mapper resource="sql/CommentMapper.xml"/>
+		<mapper resource="sql/MessageMapper.xml"/> 
+		<mapper resource="sql/CityMapper.xml"/> 
+		<mapper resource="sql/PlaceMapper.xml"/>  
+	</mappers>
+
+</configuration>

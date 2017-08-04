@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="MessageMapper">
+
+	<resultMap id="messageSelectMap" type="message">
+		<result property="msgNo" 			column="msg_no"			jdbcType="NUMERIC"/>
+		<result property="sender" 				column="sender" 			jdbcType="VARCHAR"/>
+		<result property="receiver" 			column="receiver" 		jdbcType="VARCHAR"/>
+		<result property="sendDate" 			column="send_date" 		jdbcType="DATE"/>
+		<result property="readDate" 			column="read_date" 		jdbcType="DATE"/>
+		<result property="msgContent" 		column="msg_content" 	jdbcType="VARCHAR"/>
+		<result property="isRead" 				column="is_read" 			jdbcType="NUMERIC"/>
+		<result property="sendDel" 				column="send_del" 			jdbcType="NUMERIC"/>
+		<result property="receiveDel" 				column="receive_del" 			jdbcType="NUMERIC"/>
+	</resultMap>
+	
+	 <!-- SQL : INSERT 메세지 등록-->
+	 <insert id="sendMsg" parameterType="message">
+	 	INSERT
+	 	INTO message
+	 	VALUES ( 		 seq_msg_no.nextval, 
+						 		#{sender}, 
+						 		#{receiver}, 
+						 		SYSDATE, 
+						 		#{readDate:DATE}, 
+						 		#{msgContent:VARCHAR}, 
+						 		0,
+						 		0,
+						 		0
+	 						)		 	
+	 </insert>
+	 
+	 <select id="getMsg" parameterType="int" resultMap="messageSelectMap">
+	 	SELECT
+	 	msg_no, sender, receiver, send_date, read_date, msg_content, is_read, send_del, receive_del
+	 	FROM message  
+	 	WHERE msg_no = #{value}
+	 </select>
+	 
+	 <update id="updateIsRead" parameterType="int">
+		UPDATE message 
+		SET read_date=SYSDATE, is_read=1
+		WHERE msg_no = #{value}
+	 </update>
+	 
+	 <update id="updateSendDel" parameterType="int">
+	 	UPDATE message
+	 	SET send_del = 1
+	 	WHERE msg_no = #{value}
+	 </update>
+	 
+	 	 <update id="updateReceiveDel" parameterType="int">
+	 	UPDATE message
+	 	SET receive_del = 1
+	 	WHERE msg_no = #{value}
+	 </update>
+	 
+	 <select id="listSendMsg" parameterType="search" resultMap="messageSelectMap">
+	 	SELECT *
+		FROM ( SELECT inner_table.*, ROWNUM AS row_seq
+			FROM ( SELECT msg_no, sender, receiver, send_date, msg_content, read_date
+							FROM message 
+							WHERE sender=#{searchKeyword} AND send_del = 0 ) inner_table
+			WHERE ROWNUM &lt;= #{endRowNum} )
+		WHERE row_seq BETWEEN #{startRowNum} AND #{endRowNum}
+	 </select>
+	 
+	 <select id="sendCount" parameterType="search" resultType="int">
+	 	SELECT COUNT(*)
+	 	FROM ( SELECT msg_no, sender, receiver FROM message WHERE sender=#{searchKeyword} AND send_del = 0 ) countTable
+	 </select>
+	 
+	<select id="listReceivMsg" parameterType="search" resultMap="messageSelectMap">
+	 	SELECT *
+		FROM ( SELECT inner_table.*, ROWNUM AS row_seq
+			FROM ( SELECT msg_no, sender, receiver, send_date, msg_content, read_date, is_read, send_del, receive_del
+							FROM message 
+							WHERE receiver=#{searchKeyword} AND receive_del = 0 ) inner_table
+			WHERE ROWNUM &lt;= #{endRowNum} )
+		WHERE row_seq BETWEEN #{startRowNum} AND #{endRowNum}
+	 </select>
+		 
+	<select id="receiveCount" parameterType="search" resultType="int">
+	 	SELECT COUNT(*)
+	 	FROM ( SELECT msg_no, sender, receiver FROM message WHERE receiver=#{searchKeyword} AND receive_del = 0) countTable
+	 </select>
+	 
+	 <select id="isReadMsg" parameterType="string" resultType="int">
+		SELECT COUNT(*)
+	 	FROM 
+		( 	SELECT msg_no, sender, receiver, send_date, read_date, msg_content, is_read, send_del, receive_del
+			FROM message
+			WHERE receiver = #{receiver} AND read_date is null
+		) countTable
+	 </select>
+	 
+</mapper>

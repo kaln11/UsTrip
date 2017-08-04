@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="TravelMapper">
+ 	
+	<resultMap id="travelSelectMap" type="travel">
+		<result property="travelNo" 			column="trav_no" 			jdbcType="NUMERIC"/>
+		<result property="userId"				column="user_id" 			jdbcType="VARCHAR" />
+		<result property="travTitle" 			column="trav_title" 		jdbcType="VARCHAR" />
+		<result property="travTheme" 			column="trav_theme" 		jdbcType="VARCHAR" />
+		<result property="memberCount" 			column="member_count" 		jdbcType="NUMERIC" />
+		<result property="startDate" 			column="start_date" 		jdbcType="DATE" />
+		<result property="totalDate" 			column="total_date" 		jdbcType="NUMERIC" />
+		<result property="isBlogStart" 			column="is_blog_start" 		jdbcType="NUMERIC"  />
+		<result property="thumbNail" 			column="thumb_nail" 		jdbcType="VARCHAR" />
+		<result property="nickName" 			column="nickname" 		jdbcType="VARCHAR" />
+		<result property="deleteFlag" 			column="delete_flag" 		jdbcType="NUMERIC" />
+	</resultMap>
+	
+	<insert id="addTravel" parameterType="travel">
+		INSERT INTO travel(trav_no, user_id, trav_title, trav_theme, member_count, 
+		start_date, total_date, is_blog_start, thumb_nail,delete_flag)
+		VALUES (seq_trav_no.nextval, #{userId}, #{travTitle}, #{travTheme}, #{memberCount},
+				#{startDate}, #{totalDate}, #{isBlogStart}, #{thumbNail:VARCHAR} , #{deleteFlag})
+	</insert>
+	
+	<!-- SQL : SELECT ONE -->
+	<select id="getTravel" parameterType="int" resultMap="travelSelectMap">
+		SELECT
+		*		
+		FROM travel 
+		WHERE trav_no=#{value}
+	</select>
+	
+	<select id="getTravelTravel" parameterType="travel" resultMap="travelSelectMap">
+		SELECT
+		*		
+		FROM travel 
+		WHERE trav_title=#{value}
+	</select>
+	<select id="getListTravel" parameterType="search"	resultMap="travelSelectMap">
+		  	select t.trav_no, t.trav_title, t.trav_theme, t.member_count, 
+				t.start_date, t.total_date, t.is_blog_start, t.thumb_nail, u.user_id, u.nickname
+ 			from travel t, users u
+			 <where>
+			 	t.user_id = u.user_id
+				 	<if test="searchKeyword != null">
+						 AND u.user_id = #{searchKeyword}
+					</if>
+				</where>
+			ORDER BY trav_no desc
+			
+	</select>
+	
+	<select id="getTravelList" parameterType="travel"	resultMap="travelSelectMap">
+			SELECT *
+			FROM travel
+			WHERE user_id = #{userId}
+	</select>
+	
+	<select id="totalCount" parameterType="search" resultType="int">
+	 	SELECT COUNT(*)
+	 	FROM ( SELECT *FROM travel 
+	 				<where>
+					 	<if test="searchKeyword != null">
+							 user_id = #{searchKeyword}
+						</if>
+				</where>
+		 ) countTable
+	 </select>
+	
+	 <select id="checkBlogStart" parameterType="int" resultType="int">
+	 	SELECT
+	 	is_blog_start
+	 	FROM travel
+	 	WHERE trav_no=#{travelNo}
+	 </select>
+	 
+	 <update id="startBlog" parameterType="int">
+	 	UPDATE
+	 	travel
+	 	SET is_blog_start=1
+	 	WHERE trav_no=#{travelNo}
+	 </update>
+	 
+	 <update id="thumbnailUpdate" parameterType="travel">
+	 	UPDATE
+	 	travel
+	 	set thumb_nail = #{thumbNail}
+	 	WHERE trav_no=#{travelNo}
+	 </update>
+	 
+</mapper>

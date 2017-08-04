@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="CityMapper">
+ 	
+	<resultMap id="CitySelectMap" type="city">
+		<result property="cityNo" 			column="city_no"		jdbcType="NUMERIC"/>
+		<result property="travelNo"			column="trav_no" 		jdbcType="NUMERIC"/>
+		<result property="cityId" 			column="city_id" 		jdbcType="VARCHAR"/>
+		<result property="preCityNo" 		column="pre_city_no" 	jdbcType="NUMERIC"/>
+		<result property="nextCityNo" 		column="next_city_no" 	jdbcType="NUMERIC"/>
+		<result property="city" 			column="city" 			jdbcType="VARCHAR"/>
+		<result property="cityX" 			column="city_x" 		jdbcType="NUMERIC"/>
+		<result property="cityY" 			column="city_y" 		jdbcType="NUMERIC"/>
+		<result property="stayDate" 		column="stay_date" 		jdbcType="NUMERIC"/>
+		<result property="stayStart" 		column="stay_start" 	jdbcType="DATE"/>
+		<result property="stayEnd" 			column="stay_end" 		jdbcType="DATE"/>
+	</resultMap>
+	
+	
+	<!-- SQL : INSERT -->
+	<insert id="addCity" parameterType="city">
+		INSERT INTO city(city_no, trav_no, city_id, pre_city_no, next_city_no, 
+		city, city_x, city_y, stay_date, stay_start, stay_end)
+		VALUES (seq_city_no.nextval, #{travelNo}, #{cityId}, #{preCityNo:NUMERIC}, #{nextCityNo:NUMERIC},
+				#{city}, #{cityX}, #{cityY}, #{stayDate}, #{stayStart}, #{stayEnd})
+	</insert>
+	
+	<!-- SQL : SELECT ONE -->
+	<select id="getCity" parameterType="int"	resultMap="CitySelectMap">
+		SELECT
+		*	
+		FROM city 
+		WHERE trav_no = #{value}
+	</select>
+	
+	<select id="listCity" parameterType="city"	resultMap="CitySelectMap">
+		SELECT
+		city_no,city,city_x,city_y,stay_start,STAY_END	
+		FROM city 
+		WHERE trav_no = #{travNo}
+		ORDER BY pre_city_no ASC
+	</select>
+	
+	<select id="getCityNo" parameterType="city"	resultMap="CitySelectMap">
+		SELECT
+		*		
+		FROM city
+		WHERE city_id = #{cityId} and trav_no = #{travelNo}
+	</select>
+	
+	<!-- 
+		return sqlSession.selectOne("CityMapper.getCity",city.getTravelNo());
+		return sqlSession.selectOne("CityMapper.getCityNo",tNo, cId);
+	 -->
+	
+</mapper>

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="AssetMapper"> 	
+ 	
+	<resultMap id="assetSelectMap" type="asset"  >
+		<result property="assetNo" 				column="ASSET_NO" 			jdbcType="INTEGER"/>
+  		<result property="travNo" 				column="TRAV_NO" 			jdbcType="INTEGER"/>
+  		<result property="blogNo" 				column="BLOG_NO"			jdbcType="INTEGER"/>
+  		<result property="visitDate"				column="VISIT_DATE"			jdbcType="DATE"/>
+  		<result property="regDate" 				column="REG_DATE" 			jdbcType="DATE"/>
+  		<result property="assetCategory" 		column="ASSET_CATEGORY" 	jdbcType="VARCHAR"/>
+  		<result property="usage" 				column="USAGE" 				jdbcType="VARCHAR"/>
+  		<result property="charge" 				column="CHARGE" 				jdbcType="INTEGER"/> 
+  		<result property="travTitle" 				column="TRAV_TITLE" 				jdbcType="VARCHAR"/> 	
+  		<result property="startDate"				column="START_DATE"			jdbcType="DATE"/>	
+  		<result property="totalDate" 				column="TOTAL_DATE" 			jdbcType="INTEGER"/>
+  	</resultMap>
+  	
+  	 <insert 	id="addAsset"	 parameterType="asset" useGeneratedKeys="false">
+  	  INSERT 
+      INTO asset (asset_no, trav_no, blog_no, visit_date, reg_date, asset_category, usage, charge)
+      VALUES(SEQ_ASSET_NO.nextval, #{travNo}, #{blogNo}, #{visitDate}, SYSDATE, #{assetCategory}, #{usage:VARCHAR}, #{charge})
+  	  <selectKey keyProperty="assetNo" resultType="Integer" order="AFTER">
+        	SELECT seq_asset_no.currval FROM dual
+      </selectKey>
+  	 </insert>
+  	 
+  	 <update	id="updateAsset"	parameterType="asset" >
+	   	UPDATE asset
+	   	<set>
+	   		TRAV_NO 	= #{travNo} ,
+			BLOG_NO 	= #{blogNo},
+			VISIT_DATE	= #{visitDate} ,
+			ASSET_CATEGORY	=	#{assetCategory},
+			usage = #{usage},
+			REG_DATE = SYSDATE,
+			CHARGE = #{charge}
+	   	</set>
+	   	WHERE ASSET_NO = #{assetNo}
+	 </update>
+	 
+	 <delete id="deleteAsset" parameterType="asset" >
+	 DELETE FROM asset
+	 WHERE ASSET_NO = #{assetNo}
+	 </delete>
+	 
+	 <delete id="deleteAssetByBlogNo" parameterType="int" >
+	 	DELETE FROM asset
+	 	WHERE blog_no = #{blogNo}
+	 </delete>
+	 
+	 <select  id="getAsset"  parameterType="asset"	resultMap="assetSelectMap">
+	 select a.asset_no,a.trav_no,a.blog_no,a.visit_date,a.asset_category,a.usage,charge,t.trav_title,t.start_date,t.total_date
+from
+(select asset_no,trav_no,blog_no,visit_date,reg_date,asset_category,usage,charge from asset) a,
+(select trav_no,trav_title,start_date,total_date from travel) t
+where a.trav_no(+) = t.trav_no and a.trav_no = #{travNo}
+	 </select>
+	 
+	  <select  id="oneAsset"  parameterType="asset"	resultMap="assetSelectMap">
+	  select a.asset_no,a.trav_no,a.blog_no,a.visit_date,a.asset_category,a.usage,charge,t.trav_title,t.start_date,t.total_date
+from
+(select asset_no,trav_no,blog_no,visit_date,reg_date,asset_category,usage,charge from asset) a,
+(select trav_no,trav_title,start_date,total_date from travel) t
+where a.trav_no(+) = t.trav_no and a.asset_no = #{assetNo}
+	  </select>
+	  
+	  <select  id="getAssetByBlogNo"  parameterType="int"	resultMap="assetSelectMap">
+	  	SELECT usage, asset_category, asset_no, charge
+	  	FROM asset
+	  	WHERE blog_no=#{blogNo}
+	  	ORDER BY asset_category ASC
+	  </select>
+  	
+ </mapper>

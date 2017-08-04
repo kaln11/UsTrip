@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="CommentMapper">
+
+<resultMap id="commentSelectMap" type="comment"  >
+		<result property="commentNo" 			column="COMMENT_NO" 	jdbcType="INTEGER"/>
+  		<result property="boardNo" 				column="BOARD_NO" 			jdbcType="INTEGER"/>
+  		<result property="privateComment" 	column="PRIVATE_COMMENT"	jdbcType="INTEGER"/>
+  		<result property="regDate" 				column="REG_DATE" 			jdbcType="DATE"/>
+  		<result property="nickName" 			column="NICKNAME" 			jdbcType="VARCHAR"/>
+  		<result property="commentContent" 	column="COMMENT_CONTENT" 	jdbcType="VARCHAR"/>
+  		<result property="profile" 	column="PROFILE_IMG" 	jdbcType="VARCHAR"/>
+  	</resultMap>
+  	
+  	<insert 	id="addComment"	 parameterType="comment" >
+  	  INSERT 
+      INTO board_comment
+      VALUES(SEQ_COMMENT_NO.nextval, #{boardNo}, #{nickName}, #{privateComment}, SYSDATE, #{commentContent})
+  	 </insert>
+  	 
+  	 <update	id="updateComment"	parameterType="comment" >
+	   	UPDATE board_comment
+	   	<set>
+			PRIVATE_COMMENT = #{privateComment},
+			COMMENT_CONTENT = #{commentContent}
+	   	</set>
+	   	WHERE COMMENT_NO = #{commentNo}
+	 </update>
+	 
+	 <delete id="deleteComment" parameterType="comment" >
+	 DELETE FROM board_comment
+	 WHERE COMMENT_NO = #{commentNo}
+	 </delete>
+	 
+	 <select  id="listComment"  parameterType="hashmap"	resultMap="commentSelectMap">
+	 SELECT COMMENT_NO, BOARD_NO, PRIVATE_COMMENT, REG_DATE, NICKNAME, COMMENT_CONTENT, U.PROFILE_IMG
+	 FROM board_comment, (SELECT PROFILE_IMG,NICKNAME N FROM USERS ) U
+	 WHERE BOARD_NO IN 
+	 <foreach collection="boards" item="boardNos" open="(" close=")" separator=",">
+	 #{boardNos.value}
+	 </foreach>
+	 AND NICKNAME(+) = U.N
+	 ORDER BY REG_DATE DESC
+	 </select>
+	 
+	 <select  id="getComment"  parameterType="comment"	resultMap="commentSelectMap">
+	 SELECT COMMENT_NO, BOARD_NO, PRIVATE_COMMENT, REG_DATE, NICKNAME, COMMENT_CONTENT, U.PROFILE_IMG
+	 FROM board_comment , (SELECT PROFILE_IMG,NICKNAME N FROM USERS ) U
+	 WHERE BOARD_NO = #{boardNo} AND NICKNAME(+) = U.N
+	 ORDER BY REG_DATE ASC
+	 </select>
+	 
+	 <select  id="oneComment"  parameterType="comment"	resultMap="commentSelectMap">
+	 SELECT COMMENT_NO, BOARD_NO, PRIVATE_COMMENT, REG_DATE, NICKNAME, COMMENT_CONTENT, U.PROFILE_IMG
+	 FROM board_comment, (SELECT PROFILE_IMG,NICKNAME N FROM USERS ) U
+	 WHERE COMMENT_NO = #{commentNo} AND NICKNAME(+) = U.N
+	 </select>
+
+</mapper>

@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="UserMapper">
+ 	
+ 	
+	<resultMap id="userSelectMap" type="user">
+		<result property="userId" 				column="user_id" 				jdbcType="VARCHAR"/>
+		<result property="nickName"			column="nickname" 			jdbcType="VARCHAR" />
+		<result property="password" 			column="passwd" 			jdbcType="VARCHAR" />
+		<result property="birthDate" 			column="birth_date" 			jdbcType="DATE" />
+		<result property="profileImage" 		column="profile_img" 		jdbcType="VARCHAR" />
+		<result property="gender" 				column="gender" 				jdbcType="VARCHAR" />
+		<result property="role" 					column="role" 					jdbcType="NUMERIC" />
+		<result property="isDelete" 			column="is_delete" 			jdbcType="NUMERIC" />
+	</resultMap>
+	
+	<!-- SQL : INSERT 기본 회원가입-->
+		 <insert id="addUser" parameterType="user">
+		 	INSERT
+		 	INTO users
+		 	VALUES ( 		#{userId}, 
+							 	#{nickName}, 
+							 	#{password}, 
+							 	#{birthDate}, 
+							 	#{profileImage:VARCHAR}, 
+							 	#{gender}, 
+							 	1, 
+		 						1)		 	
+		 </insert>
+		 
+		 <!-- SQL : INSERT 추가 정보 입력-->
+		 <insert id="extraUserInfo" parameterType="user">
+		 	INSERT
+		 	INTO users
+		 	VALUES ( 		#{userId}, 
+							 	#{nickName}, 
+							 	'1111', 
+							 	#{birthDate}, 
+							 	#{profileImage:VARCHAR}, 
+							 	#{gender}, 
+							 	1, 
+		 						1)		 	
+		 </insert>
+		
+		<!-- SQL : SELECT ONE 정보조회-->
+		 <select 	id="getUser"	parameterType="string"	resultMap="userSelectMap">
+			SELECT
+			user_id, nickName, passwd, birth_date, profile_img, gender, role, is_delete
+			FROM users 
+			WHERE user_id = #{value}
+		 </select>
+		 
+		 <!-- SQL : SELECT ONE 닉네임조회-->
+		 <select 	id="checkNickName"	parameterType="string"	resultMap="userSelectMap">
+			SELECT
+			nickname
+			FROM users 
+			WHERE nickname = #{value}
+		 </select>
+		 
+		 <!-- SQL : UPDATE 회원정보수정-->
+		 <update	id="updateUser"	parameterType="user" >
+		   	UPDATE users
+		   	<set>
+		   		nickName 	= #{nickName},
+				passwd		= #{password},
+				profile_img 	= #{profileImage:VARCHAR}
+		   	</set>
+		   	WHERE user_id = #{userId}
+		 </update>	 
+		 
+		 <!-- SQL : UPDATE 회원탈퇴-->
+		 <update	id="withdrawUser"	parameterType="string" >
+		   	UPDATE users
+		   	<set>
+		   		is_delete = 0
+		   	</set>
+		   	WHERE user_id = #{userId}
+		 </update>	 
+		 
+		 <!-- SQL : SELECT LIST -->
+		<select  id="listUser"  parameterType="search"	resultMap="userSelectMap">
+		  	SELECT *
+		  	FROM (	SELECT inner_table.* , ROWNUM AS row_seq
+		  					FROM		(	SELECT user_id , nickName , profile_img, gender, is_delete
+												FROM users
+											<if test="searchCondition != null">
+												<where>
+													<if test="searchCondition == 0 and searchKeyword !='' ">
+										 				user_id like '%'||#{searchKeyword}||'%'
+													</if>
+													<if test="searchCondition == 1 and searchKeyword !='' ">
+										 				nickName like '%'||#{searchKeyword}||'%'
+													</if>
+												</where>
+											</if>												
+												ORDER BY user_id ) inner_table
+							WHERE ROWNUM &lt;= #{endRowNum} )
+			WHERE row_seq BETWEEN #{startRowNum} AND #{endRowNum} 
+		 </select>
+			 
+		<!-- SQL : SELECT ROW Count -->	 
+		 <select  id="getUserTotalCount"  parameterType="search"	 resultType="int">
+		  	SELECT COUNT(*)
+		  	FROM(	SELECT user_id , nickName , profile_img, gender, is_delete
+							FROM users 
+						<if test="searchCondition != null">
+							<where>
+								<if test="searchCondition == 0 and searchKeyword !='' ">
+						 			user_id like '%'||#{searchKeyword}||'%'
+								</if>
+								<if test="searchCondition == 1 and searchKeyword !='' ">
+						 		nickName like '%'||#{searchKeyword}||'%'
+								</if>
+							</where>
+						</if> 
+							) countTable						
+		 </select>
+		 
+		  <!-- SQL : SELECT ONE 닉네임으로 ID가져오기-->
+		 <select 	id="getUserId"	parameterType="string"	resultType="string">
+			SELECT
+			user_id
+			FROM users 
+			WHERE nickname = #{value}
+		 </select>
+			 		 
+			 
+</mapper>

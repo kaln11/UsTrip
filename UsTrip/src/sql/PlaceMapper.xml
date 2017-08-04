@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="PlaceMapper">
+ 	
+	<resultMap id="placeSelectMap" type="place">
+		<result property="placeNo" 			column="place_no" 		jdbcType="NUMERIC"/>
+		<result property="cityNo"			column="city_no" 		jdbcType="NUMERIC" />
+		<result property="travelNo"			column="trav_no" 		jdbcType="NUMERIC" />
+		<result property="placeId" 			column="place_id" 		jdbcType="VARCHAR" />
+		<result property="prePlaceNo" 		column="pre_place_no" 	jdbcType="NUMERIC" />
+		<result property="nextPlaceNo" 		column="next_place_no" 	jdbcType="NUMERIC" />
+		<result property="place" 			column="place" 			jdbcType="VARCHAR" />
+		<result property="placeX" 			column="place_x" 		jdbcType="NUMERIC" />
+		<result property="placeY" 			column="place_y" 		jdbcType="NUMERIC"  />
+		<result property="visitDate" 		column="visit_date" 	jdbcType="DATE" />
+		<result property="memo" 			column="memo" 			jdbcType="VARCHAR" />
+	</resultMap>
+	
+	 <select id="listPlace" parameterType="place" resultMap="placeSelectMap">
+	 	SELECT 
+	 	place_no, city_no, trav_no, place, visit_date, memo,place_x,place_y
+	 	FROM place
+	 	WHERE city_no = #{cityNo}
+	 	ORDER BY PRE_PLACE_NO ASC
+	 </select>
+	 
+	 <select id="listPlaceNo" parameterType="search" resultType="int">
+	 	SELECT
+	 	place_no
+	 	FROM place
+	 	WHERE trav_no=#{searchKeyword} AND visit_date=TO_DATE(#{searchDate},'yy/MM/dd')
+	 	START WITH
+	 		pre_place_no IS NULL
+	 	CONNECT BY PRIOR
+	 		next_place_no=place_no
+	 </select>
+	 
+	 <select id="listPlaceNoTemp" parameterType="int" resultType="int">
+	 	SELECT
+	 	place_no
+	 	FROM place
+	 	WHERE trav_no=#{travelNo}
+	 	START WITH
+	 		pre_place_no IS NULL
+	 	CONNECT BY PRIOR
+	 		next_place_no=place_no
+	 </select>
+	 
+	 <insert id="addPlace" parameterType="place">
+		INSERT INTO place(place_no, city_no, trav_no, place_id, place, 
+		place_x, place_y, pre_place_no, next_place_no, memo, visit_date)		
+		VALUES (seq_place_no.nextval, #{cityNo}, #{travelNo}, #{placeId}, #{place},
+				#{placeX}, #{placeY}, #{prePlaceNo:NUMERIC}, #{nextPlaceNo:NUMERIC}, #{memo}, #{visitDate})
+	</insert>
+	
+	
+	
+	<!-- SQL : SELECT ONE -->
+	<!-- WHERE 부분 PLACE명으로 바꿀지 생각해봐야함 
+	아직 작동 안함 오류남 -->
+	<select id="getPlace" parameterType="string"	resultMap="placeSelectMap">
+		SELECT
+		*		
+		FROM place 
+		WHERE place_no = #{value}
+	</select>
+	 
+</mapper>

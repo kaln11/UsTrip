@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="FollowMapper">
+	
+	<resultMap id="followSelectMap" type="follow">
+		<result property="followNo" 			column="follow_no" 			jdbcType="NUMERIC" />
+		<result property="folUserId" 			column="fol_user_id" 			jdbcType="VARCHAR"/>
+		<result property="targetUserId"		column="target_user_id" 	jdbcType="VARCHAR" />
+		<result property="isFollowing" 		column="is_following"		jdbcType="NUMERIC"/>
+		<result property="profileImage"		column="profile_img" 		jdbcType="VARCHAR" />
+		<result property="nickName"			column="nickname" 			jdbcType="VARCHAR" />
+	</resultMap>
+	
+	<!-- SQL : INSERT 팔로우 추가-->
+	<insert id="addFollow" parameterType="map">
+		INSERT
+		INTO follow
+		VALUES ( 	seq_follow_no.nextval, 
+					 	#{folUserId}, 
+					 	#{targetUserId},
+					 	#{isFollowing}
+				)		 	
+	</insert>
+	
+	<select id="getFollow" parameterType="map" resultMap="followSelectMap">
+		SELECT * FROM follow WHERE fol_user_id = #{folUserId} AND target_user_id = #{targetUserId}
+	</select>
+	
+	<update id="updateFollow" parameterType="follow">
+		UPDATE follow 
+		<set>
+			 is_following = #{isFollowing} 
+		</set>
+		WHERE fol_user_id = #{folUserId} 
+		AND target_user_id = #{targetUserId}
+	</update>
+	
+	<!-- SQL : SELECT LIST -->
+	<select  id="listFollow"  parameterType="search"	resultMap="followSelectMap">
+	  	SELECT f.follow_no, f.fol_user_id , f.target_user_id, f.is_following, u.nickname, u.profile_img
+		FROM follow f, users u
+		WHERE f.fol_user_id=#{searchKeyword}	
+		AND u.user_id = f.target_user_id	
+	 </select>
+	 
+	<!-- SQL : SELECT LIST -->
+	<select  id="listFollowing"  parameterType="search"	resultMap="followSelectMap">
+		SELECT f.follow_no, f.fol_user_id , f.target_user_id, f.is_following, u.nickname, u.profile_img
+			FROM follow f, users u
+			WHERE f.target_user_id=#{searchKeyword}	
+			AND f.fol_user_id = u.user_id
+	 </select>
+	 
+	 <select id="isFollowing" parameterType="search" resultMap="followSelectMap">
+		 SELECT inner.fol_user_id, inner.target_user_id, f.follow_no, f.fol_user_id , f.target_user_id, f.is_following, u.nickname, u.profile_img
+			FROM follow f, users u, ( select follow_no, fol_user_id, target_user_id 
+																from follow
+																where fol_user_id=#{searchKeyword}) inner
+			WHERE f.target_user_id=#{searchKeyword}
+			AND f.fol_user_id = u.user_id
+			and inner.target_user_id = f.fol_user_id
+	 </select>
+	 
+	 <select id="getFollowTotalCount" parameterType="search" resultType="int">
+	 	SELECT COUNT(*)
+	 	FROM ( SELECT follow_no, fol_user_id, target_user_id 
+	 					FROM follow
+	 					WHERE fol_user_id = #{searchKeyword}
+	 				 ) countTable
+	 </select>
+	 
+	<select id="getFollowingTotalCount" parameterType="search" resultType="int">
+	 	SELECT COUNT(*)
+	 	FROM ( SELECT follow_no, fol_user_id, target_user_id 
+	 					FROM follow
+	 					WHERE target_user_id = #{searchKeyword}
+	 				 ) countTable
+	 </select>
+	 
+	 <delete id="deleteFollow" parameterType="map">
+	 	DELETE FROM follow WHERE fol_user_id=#{folUserId} AND target_user_id = #{targetUserId}
+	 </delete>
+
+</mapper>
